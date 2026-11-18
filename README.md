@@ -60,7 +60,7 @@ With the clone active, verify the original status indicators, changing CPU/RAM r
 2. Start an agent working and enable manual mode, then right-click: the tooltip changes to working-agent mode. Turn it off with a right-click and check that no manual assertion keeps renewing. Re-enable working-agent mode, then stop the last working agent; record the time from Herdr reporting no agents working until the last mod-owned display assertion disappears.
 3. Enable manual mode again and follow the rollback below while a lease is active. Confirm the original status bar returns and that the packaged mod’s assertion expires and does not renew.
 
-On the tested configuration, the packaged mod loaded in a clean clone, both awake modes were exercised through Herdr commands, and the display assertion was gone within 3.2 seconds of switching back to the original layout with manual mode active. Physical clicks and live assertion release after the last agent stops are still unverified; the latter transition is covered by the Bun state test.
+The packaged mod loaded in a clean clone. Manual testing confirmed that both physical cup clicks activate keep-awake. In a separate rollback test, the display assertion cleared within 3.2 seconds of switching back to the original layout with manual mode active. The Bun test covers the last-agent transition, but the live assertion release time after the last working agent stops has not been measured.
 
 ## Roll back or uninstall
 
