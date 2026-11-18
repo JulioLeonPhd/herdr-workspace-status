@@ -13,7 +13,7 @@ export class AwakeControl {
   }
 
   toggle(button, working) {
-    this.reconcile(working);
+    if (button !== "left") this.reconcile(working);
     if (button === "left") {
       if (this.mode === "off") this.mode = "manual";
       else this.stop();

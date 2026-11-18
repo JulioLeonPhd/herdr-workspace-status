@@ -20,6 +20,13 @@ test("clicks select or clear a mode, and agent mode ends with the last working a
   assert.equal(state.mode, "off");
 });
 
+test("left-click turns off agent mode even if the last agent just stopped", () => {
+  const state = new AwakeControl();
+  state.toggle("right", true);
+  assert.equal(state.toggle("left", false), true);
+  assert.equal(state.mode, "off");
+});
+
 test("stopping keep-awake ignores a late failure from an in-flight assertion", async () => {
   let resolveLease;
   let failed = 0;
