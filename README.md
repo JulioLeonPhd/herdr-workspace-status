@@ -38,7 +38,7 @@ $herdr = Join-Path $env:LOCALAPPDATA 'Programs\herdr-app\herdr-app.exe'
 $config = if ($env:HERDR_APP_HOME) { $env:HERDR_APP_HOME } else { Join-Path $HOME '.config\herdr-app' }
 $modDir = Join-Path $config 'mods\herdr-workspace-status'
 New-Item -ItemType Directory -Path $modDir -ErrorAction Stop | ForEach-Object {
-    Copy-Item herdr-workspace-status\mod.json,herdr-workspace-status\main.js,herdr-workspace-status\awake.js,herdr-workspace-status\sample.js,herdr-workspace-status\coffee.svg -Destination $_.FullName -ErrorAction Stop
+    Copy-Item windows\mod.json,herdr-workspace-status\main.js,herdr-workspace-status\awake.js,herdr-workspace-status\sample.js -Destination $_.FullName -ErrorAction Stop
     & $herdr check $_.FullName
 }
 ```
@@ -46,9 +46,12 @@ New-Item -ItemType Directory -Path $modDir -ErrorAction Stop | ForEach-Object {
 `New-Item` fails if the destination exists; do not overwrite an existing installation. Continue only if `check` succeeds. Clone `main` to a fresh layout name; this leaves `main` intact:
 
 ```powershell
-& $herdr do layout.clone --name main --as workspace-status-windows
-$layout = Join-Path $config 'layouts\workspace-status-windows.json'
-notepad $layout
+if ((& $herdr do layout.clone --name main --as workspace-status-windows | Out-String | ConvertFrom-Json).ok) {
+    $layout = Join-Path $config 'layouts\workspace-status-windows.json'
+    notepad $layout
+} else {
+    throw 'Layout clone failed. Leave the existing layout untouched.'
+}
 ```
 
 In the clone only, find the block with `"id": "status"` and change `content.mod` from `workspace-status` to `herdr-workspace-status`. Save; Herdr reloads the layout. Then verify the active layout:
