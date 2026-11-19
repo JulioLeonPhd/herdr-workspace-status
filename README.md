@@ -1,6 +1,6 @@
 # Herdr Workspace Status
 
-A JavaScript/GPUI mod for the Herdr desktop app. It preserves the workspace status bar (machine, branch when available, agent counts, and command palette) and adds a local CPU sparkline and a physical RAM meter on macOS and Windows. The keep-awake cup and its palette commands are macOS-only.
+A JavaScript/GPUI mod for the Herdr desktop app. It preserves the workspace status bar (machine, branch when available, agent counts, and command palette) and adds a local CPU sparkline, a physical RAM meter, and a keep-awake cup on macOS and Windows.
 
 Tested with **Herdr desktop 0.1.16** on **macOS 27.2.1** and **Windows 11 ARM64, build 26200.9974**. This mod is not for the Herdr TUI or Sheprd.
 
