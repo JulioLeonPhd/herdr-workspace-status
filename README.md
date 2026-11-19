@@ -67,7 +67,12 @@ In the clone only, find the block with `"id": "status"` and change `content.mod`
 - **CPU:** Guest-local activity from `Win32_PerfFormattedData_PerfOS_Processor` (`_Total.PercentProcessorTime`), with up to 24 recent readings in the sparkline.
 - **RAM:** Guest-local physical-memory usage from `Win32_OperatingSystem.TotalVisibleMemorySize` and `FreePhysicalMemory`.
 - These are guest-local readings even when viewing a remote workspace. A failed or unavailable sample is shown as `—`, not zero.
-- The keep-awake cup is macOS-only. This Windows mod reports meters without making any power requests.
+
+### Windows keep awake
+
+The cup beside RAM behaves as it does on macOS: left-click starts or stops **manual** mode, right-click starts or stops **working-agent** mode, and right-click with no working agent leaves the state unchanged. The tooltip names the active mode.
+
+Windows has no `caffeinate`, so each renewal is one short PowerShell child that sets `PowerCreateRequest`/`PowerSetRequest` for display and system and holds them until an absolute deadline, then exits. Windows drops the requests when that process dies, which bounds every release path. The child uses `PowerClearRequest` before exit and on any failure. A release therefore needs no cooperation from the mod: removing it, switching layout, or killing Herdr all end within one lease.
 
 In the ARM64 UTM guest, three standalone samples took 0.63–0.64 seconds each (elapsed time, including PowerShell startup). The mod waits five seconds after each completed sample; two observed intervals between sampler starts in Herdr were 6.7 and 6.9 seconds. Interrupting one sample displayed `—` for both meters; the next successful refresh restored the readings.
 
@@ -126,6 +131,14 @@ On macOS, with the clone active, verify the original status indicators, changing
 3. Enable manual mode again and follow the rollback below while a lease is active. Confirm the original status bar returns and that the packaged mod’s assertion expires and does not renew.
 
 On macOS, the packaged mod loaded in a clean clone. Manual testing confirmed that both physical cup clicks activate keep-awake. In a separate rollback test, the display assertion cleared within 3.2 seconds of switching back to the original layout with manual mode active. The Bun test covers the last-agent transition, but the live assertion release time after the last working agent stops has not been measured.
+
+On Windows, check the same states with `powercfg /requests` and look for a `Herdr keep awake` entry under DISPLAY and SYSTEM:
+
+```powershell
+powercfg.exe /requests
+```
+
+In the ARM64 guest, with the packaged mod in the clone and a physical left click on the cup, the entry appeared and was still present 12 seconds later (renewal working), and the second click released it in 0.5 seconds. Right-click with one working agent held the entry and released it 2.4 seconds after that agent was killed; right-click with no working agent added nothing. Switching to another layout released it in 0.8 seconds, and force-killing `herdr-app` released it in 1.1 seconds. All of these are within one 3.8-second lease plus process teardown; slower guests can approach that bound.
 
 ## Roll back or uninstall on macOS
 
