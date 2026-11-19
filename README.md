@@ -35,7 +35,9 @@ Run these commands from the repository root in a PowerShell terminal on the Wind
 
 ```powershell
 $herdr = Join-Path $env:LOCALAPPDATA 'Programs\herdr-app\herdr-app.exe'
-$config = if ($env:HERDR_APP_HOME) { $env:HERDR_APP_HOME } else { Join-Path $HOME '.config\herdr-app' }
+$config = if ($env:HERDR_APP_HOME) { $env:HERDR_APP_HOME }
+          elseif ($env:XDG_CONFIG_HOME) { Join-Path $env:XDG_CONFIG_HOME 'herdr-app' }
+          else { Join-Path $HOME '.config\herdr-app' }
 $modDir = Join-Path $config 'mods\herdr-workspace-status'
 New-Item -ItemType Directory -Path $modDir -ErrorAction Stop | ForEach-Object {
     Copy-Item windows\mod.json,herdr-workspace-status\main.js,herdr-workspace-status\awake.js,herdr-workspace-status\sample.js -Destination $_.FullName -ErrorAction Stop
@@ -78,11 +80,16 @@ Switch back to the layout that was active before cloning (`main` here) before re
 & $herdr status
 ```
 
-Switching away disables the mod in that window. If the clone is active in another Herdr window, switch that window too. To keep the clone but disable the mod, restore its `status` block to `"mod": "workspace-status"`. Once no layouts reference the mod, remove only this installation and, if desired, the clone:
+Switching away disables the mod in that window. If the clone is active in another Herdr window, switch that window too. To keep the clone, restore its `status` block to `"mod": "workspace-status"`. If you no longer want the clone or any customizations in it, optionally delete **only the clone created above**:
 
 ```powershell
-if (Test-Path $modDir) { Remove-Item $modDir -Recurse }
-if (Test-Path $layout) { Remove-Item $layout }
+Remove-Item -LiteralPath $layout -Confirm
+```
+
+Once no layouts reference the mod, remove the mod installation:
+
+```powershell
+Remove-Item -LiteralPath $modDir -Recurse
 ```
 
 Do not remove `main.json`, another layout, Herdr’s bundled status mod, or the original layout.
