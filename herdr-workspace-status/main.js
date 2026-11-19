@@ -5,17 +5,45 @@
 import { View, div, svg } from "gpui-kit";
 import { h_flex } from "gpui-base";
 import { spaces, agents, theme, run, window, keys, exec, checking, nextCommand, notify } from "herdr";
-import { cpuPercent, ramPercent, selfCheck } from "./sample.js";
+import { cpuPercent, ramPercent, selfCheck, windowsMetrics } from "./sample.js";
 import { AwakeControl } from "./awake.js";
 
 const CPU_COMMAND = "LC_ALL=C /usr/sbin/iostat -n 0 -c 2 -w 1";
 const MEMORY_COMMAND = "LC_ALL=C pages=$(/usr/bin/vm_stat) && total=$(/usr/sbin/sysctl -n hw.memsize) && printf '%s\\n---MEMSIZE---\\n%s' \"$pages\" \"$total\"";
+const WINDOWS_SCRIPT = `\$c=\$null;\$r=\$null;
+try {
+  foreach (\$v in ([wmisearcher]'select PercentProcessorTime from Win32_PerfFormattedData_PerfOS_Processor where Name=''_Total''').Get()) {
+    if (\$null -ne \$v.PercentProcessorTime) { \$c=[double]\$v.PercentProcessorTime }
+  }
+} catch {}
+try {
+  foreach (\$v in ([wmisearcher]'select FreePhysicalMemory,TotalVisibleMemorySize from Win32_OperatingSystem').Get()) {
+    \$t=\$v.TotalVisibleMemorySize;\$f=\$v.FreePhysicalMemory;
+    if (\$null -ne \$t -and \$null -ne \$f -and \$t -gt 0) { \$r=100*(\$t-\$f)/\$t }
+  }
+} catch {}
+[Console]::OutputEncoding=[Text.UTF8Encoding]::new();
+[pscustomobject]@{cpu=\$c;ram=\$r}|ConvertTo-Json -Compress`;
+const WINDOWS_ARGS = ["-NoLogo", "-NoProfile", "-NonInteractive", "-Command", WINDOWS_SCRIPT];
 const HISTORY = 24;
+function sampleWindows() {
+  return exec("powershell.exe", WINDOWS_ARGS, { timeout: 8000 })
+    .then(result => result.code === 0 ? windowsMetrics(result.stdout) : [null, null], () => [null, null]);
+}
+
 function parseMemory(stdout) {
   const [vm, total] = stdout.split("\n---MEMSIZE---\n");
   return total === undefined ? null : ramPercent(vm, total);
 }
 
+function sampleMac() {
+  return Promise.all([
+    exec("/bin/sh", ["-c", CPU_COMMAND], { timeout: 4000 })
+      .then(result => result.code === 0 ? cpuPercent(result.stdout) : null, () => null),
+    exec("/bin/sh", ["-c", MEMORY_COMMAND], { timeout: 4000 })
+      .then(result => result.code === 0 ? parseMemory(result.stdout) : null, () => null),
+  ]);
+}
 function sparkline(values, color) {
   return h_flex().w(47).h(12).gap(1).justify_end().items_end()
     .children(values.map(value => div().w(1).h(Math.max(1, value * 0.12)).bg(color)));
@@ -26,15 +54,6 @@ function meter(value, t) {
     .child(div().w(32 * value / 100).h(5).rounded(3).bg(t.muted));
 }
 
-function sampleCpu() {
-  return exec("/bin/sh", ["-c", CPU_COMMAND], { timeout: 4000 })
-    .then(result => result.code === 0 ? cpuPercent(result.stdout) : null, () => null);
-}
-
-function sampleRam() {
-  return exec("/bin/sh", ["-c", MEMORY_COMMAND], { timeout: 4000 })
-    .then(result => result.code === 0 ? parseMemory(result.stdout) : null, () => null);
-}
 function workingAgents() {
   return agents().some(a => a.status === "working");
 }
@@ -67,14 +86,17 @@ export default class WorkspaceStatus extends View {
           }
         });
       }
-      cx.spawn(async cx => {
-        while (true) {
-          [this.cpu, this.memory] = await Promise.all([sampleCpu(), sampleRam()]);
-          if (this.cpu !== null) this.history = [...this.history, this.cpu].slice(-HISTORY);
-          cx.notify();
-          await cx.sleep(5000);
-        }
-      });
+      const platform = window()?.platform;
+      if (platform === "macos" || platform === "windows") {
+        cx.spawn(async cx => {
+          while (true) {
+            [this.cpu, this.memory] = platform === "windows" ? await sampleWindows() : await sampleMac();
+            if (this.cpu !== null) this.history = [...this.history, this.cpu].slice(-HISTORY);
+            cx.notify();
+            await cx.sleep(5000);
+          }
+        });
+      }
     }
   }
 

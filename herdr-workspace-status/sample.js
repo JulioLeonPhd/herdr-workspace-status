@@ -22,6 +22,16 @@ export function ramPercent(vm, memsize) {
   return Math.min(100, (pages * pageSize) / total * 100);
 }
 
+export function windowsMetrics(text) {
+  try {
+    const value = JSON.parse(text);
+    const percent = number => typeof number === "number" && Number.isFinite(number) && number >= 0 && number <= 100 ? number : null;
+    return [percent(value.cpu), percent(value.ram)];
+  } catch {
+    return [null, null];
+  }
+}
+
 export function selfCheck() {
   const check = (condition, message) => { if (!condition) throw new Error(`resource parser: ${message}`); };
   check(cpuPercent("us sy id 1m 5m 15m\n10 5 80 0.1 0.2 0.3\n20 10 55 0.1 0.2 0.3") === 45, "second iostat sample");
