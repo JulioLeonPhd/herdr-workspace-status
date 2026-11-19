@@ -4,7 +4,15 @@ A JavaScript/GPUI mod for the Herdr desktop app. It preserves the workspace stat
 
 Tested with **Herdr desktop 0.1.16** on **macOS 27.2.1** and **Windows 11 ARM64, build 26200.9974**. This mod is not for the Herdr TUI or Sheprd.
 
-![Herdr status bar showing the CPU sparkline, RAM meter, keep-awake cup, and command hint](docs/status-bar.png)
+![Herdr status bar showing the CPU sparkline, RAM meter, keep-awake cup, and command hint](preview.png)
+
+## Tell your agent
+
+Paste this into a coding agent running on the machine that runs Herdr:
+
+> Read `~/.config/herdr-app/AGENTS.md`, then add this mod: https://github.com/JulioLeonPhD/herdr-workspace-status
+
+The agent reads [RECIPE.md](RECIPE.md) and the files, copies the mod into `mods/`, and puts it in a cloned layout. On Windows, tell it to install `windows/mod.json` as the manifest instead of the macOS one.
 
 ## Install into a cloned layout on macOS
 
@@ -40,7 +48,7 @@ $config = if ($env:HERDR_APP_HOME) { $env:HERDR_APP_HOME }
           else { Join-Path $HOME '.config\herdr-app' }
 $modDir = Join-Path $config 'mods\herdr-workspace-status'
 New-Item -ItemType Directory -Path $modDir -ErrorAction Stop | ForEach-Object {
-    Copy-Item windows\mod.json,herdr-workspace-status\main.js,herdr-workspace-status\awake.js,herdr-workspace-status\sample.js -Destination $_.FullName -ErrorAction Stop
+    Copy-Item windows\mod.json,herdr-workspace-status\main.js,herdr-workspace-status\awake.js,herdr-workspace-status\sample.js,herdr-workspace-status\coffee.svg -Destination $_.FullName -ErrorAction Stop
     & $herdr check $_.FullName
 }
 ```
