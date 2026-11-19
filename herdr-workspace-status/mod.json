@@ -1,0 +1,11 @@
+{
+  "place": "none",
+  "commands": [
+    { "id": "awake-left", "title": "Toggle keep awake manually" },
+    { "id": "awake-right", "title": "Keep awake while agents work" }
+  ],
+  "cloned_from": {
+    "name": "workspace-status",
+    "version": "0.1.16"
+  }
+}
