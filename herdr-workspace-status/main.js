@@ -150,7 +150,7 @@ export default class WorkspaceStatus extends View {
     const metric = (name, value, graph) => h_flex().gap(5).items_center()
       .child(div().text_color(t.muted).child(name))
       .child(graph)
-      .child(div().w(30).text_color(t.foreground).child(value === null ? "—" : `${Math.round(value)}%`));
+      .child(div().w(36).flex_shrink_0().whitespace_nowrap().text_color(t.foreground).child(value === null ? "—" : `${Math.round(value)}%`));
     const cpu = metric("CPU", this.cpu, sparkline(this.cpu === null ? [] : this.history, t.muted));
     const ram = metric("RAM", this.memory, meter(this.memory ?? 0, t));
     return h_flex().size_full().px(14).gap(16).items_center().bg(t.chrome).border_t(1).border_color(t.border).text_size(11.8).text_color(t.muted)

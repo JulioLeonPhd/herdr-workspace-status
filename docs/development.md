@@ -36,6 +36,8 @@ powercfg.exe /requests
 
 Test physical cup clicks, agent-mode transitions, and switching to another layout. Force-killing Herdr can also check that the OS releases the bounded request when its PowerShell child exits.
 
+To check meter layout, use a disposable mod copy and force CPU, RAM, and all CPU history samples to 100%. Verify both percentage labels stay on one line without touching their graphs. Include Geist at 125% Windows display scaling and 100% Herdr zoom.
+
 ### Recorded Windows results
 
 On the Windows 11 ARM64 UTM guest, three standalone meter samples took **0.63–0.64 seconds each** elapsed, including PowerShell startup. The sampler waits five seconds after each completed sample; two observed intervals between sampler starts in Herdr were **6.7 and 6.9 seconds**. Interrupting a sample displayed `—` for both meters; the next successful refresh restored the readings.
