@@ -31,7 +31,7 @@ An unavailable reading shows `—` with an empty sparkline; it is never reported
 
 ## Built from
 
-- `mod.json` — `place: "none"` (the mod appears only where a layout names it), the two commands above, and `cloned_from` naming Herdr's `workspace-status` 0.1.16. `windows/mod.json` carries the same commands without `cloned_from`; on Windows it replaces the manifest.
+- `mod.json` — version `1.0.1` for this mod; `place: "none"` (the mod appears only where a layout names it), the two commands above, and `cloned_from` naming Herdr's `workspace-status` 0.1.16. `windows/mod.json` carries the same mod version and commands without `cloned_from`; on Windows it replaces the manifest. `cloned_from.version` is the source mod's version, not this mod's version.
 - `main.js` — one `View` class. It reads `spaces()`, `agents()`, `theme()`, `window()`, `keys()` and `checking()`; calls `exec`, `nextCommand`, `notify` and `run("app.palette")`; owns the bar layout, the sparkline, the meter, the cup, and the palette hint.
 - `sample.js` — `cpuPercent` (100 minus the idle field of the last `iostat` row), `ramPercent` (active + wired + compressor + speculative pages times page size over `hw.memsize`), `windowsMetrics` (validated `cpu`/`ram` from the PowerShell JSON), and `selfCheck`, which runs when `checking()` is true.
 - `awake.js` — `AwakeControl` (the off/manual/agents machine with a generation counter that cancels an in-flight renewal), `RENEW_MS = 2800`, `NATIVE_LEASE_MS = 3800`, and the Windows lease: a C# class compiled with `Add-Type` that calls `PowerCreateRequest`, `PowerSetRequest` and `PowerClearRequest` for request types 0 and 1, shipped as UTF-16LE base64 through `-EncodedCommand` so no quoting reaches the PowerShell parser.

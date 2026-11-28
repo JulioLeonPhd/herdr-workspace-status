@@ -1,4 +1,5 @@
 {
+  "version": "1.0.1",
   "place": "none",
   "commands": [
     { "id": "awake-left", "title": "Toggle keep awake manually" },
